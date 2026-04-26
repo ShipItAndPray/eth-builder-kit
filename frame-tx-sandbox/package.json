@@ -1,0 +1,31 @@
+{
+  "name": "frame-tx-sandbox",
+  "version": "0.1.0",
+  "description": "Local sandbox for EIP-8141 Frame Transactions: encoder, decoder, validator, and atomic-revert simulator.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "frame-tx": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "eval": "tsx eval/run.ts"
+  },
+  "files": ["dist", "src", "README.md"],
+  "license": "MIT",
+  "dependencies": {
+    "@ethereumjs/rlp": "^5.0.2",
+    "@noble/hashes": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}
