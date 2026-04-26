@@ -1,0 +1,27 @@
+{
+  "name": "interop-address-kit",
+  "version": "0.1.0",
+  "description": "TypeScript reference implementation of ERC-7930 (binary) and ERC-7828 (text) interoperable addresses.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "eval": "tsx eval/run.ts"
+  },
+  "files": ["dist", "src", "README.md"],
+  "license": "MIT",
+  "dependencies": {
+    "@noble/hashes": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}
