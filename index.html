@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>eth-builder-kit — interop-address-kit + frame-tx-sandbox</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NNV3CN8D2N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-NNV3CN8D2N');
+</script>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #14181d;
+    --line: #232a32;
+    --text: #e6e8eb;
+    --muted: #97a3b0;
+    --accent: #6cf;
+    --ok: #6f6;
+    --err: #f66;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    background: var(--bg); color: var(--text);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    max-width: 980px; margin-inline: auto;
+  }
+  header { margin-bottom: 32px; }
+  h1 { font-size: 24px; margin: 0 0 8px; }
+  h2 { font-size: 18px; margin: 28px 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 4px; }
+  .badges { margin: 12px 0 0; }
+  .badges a {
+    color: var(--accent); text-decoration: none; margin-right: 12px;
+    border-bottom: 1px solid transparent;
+  }
+  .badges a:hover { border-bottom-color: var(--accent); }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 18px; margin-bottom: 18px;
+  }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  input[type=text], textarea {
+    width: 100%; background: #0a0c0f; color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px;
+    font: 13px var(--mono); padding: 10px;
+    margin-bottom: 12px;
+  }
+  textarea { min-height: 140px; resize: vertical; }
+  pre {
+    background: #0a0c0f; border: 1px solid var(--line);
+    border-radius: 6px; padding: 12px; margin: 0;
+    font: 13px var(--mono); overflow-x: auto;
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .ok { color: var(--ok); }
+  .err { color: var(--err); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .row { grid-template-columns: 1fr; } }
+  button {
+    background: #1f262d; color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 8px 14px; cursor: pointer;
+    font: inherit; margin-right: 8px;
+  }
+  button:hover { background: #2a323a; }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    background: #1a2026; color: var(--accent); font: 11px var(--mono);
+    margin-left: 6px;
+  }
+  .stat { display: flex; gap: 24px; flex-wrap: wrap; margin: 8px 0 0; }
+  .stat span b { color: var(--ok); font: 14px var(--mono); }
+  .stat span { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>eth-builder-kit</h1>
+  <p class="sub">Two reference implementations for in-flight Ethereum standards. Both built and hardened via autoresearch (run evals → fix → loop).</p>
+  <div class="stat">
+    <span>interop-address-kit (ERC-7930 + ERC-7828): <b>2,471 / 2,471</b></span>
+    <span>frame-tx-sandbox (EIP-8141): <b>3,797 / 3,797</b></span>
+  </div>
+  <p class="badges">
+    <a href="https://github.com/ShipItAndPray/eth-builder-kit">GitHub</a>
+    <a href="https://eips.ethereum.org/EIPS/eip-7930">ERC-7930</a>
+    <a href="https://eips.ethereum.org/EIPS/eip-7828">ERC-7828</a>
+    <a href="https://eips.ethereum.org/EIPS/eip-8141">EIP-8141</a>
+  </p>
+</header>
+
+<h2>Interoperable Address Decoder <span class="pill">ERC-7930 / 7828</span></h2>
+<div class="panel">
+  <label for="text-input">Text form (e.g. <code>vitalik.eth@ethereum</code> or <code>0x…@eip155:1#XXXXXXXX</code>) or 0x… binary</label>
+  <input id="text-input" type="text" value="0xd8da6bf26964af9d7eed9e03e53415d37aa96045@eip155:1" />
+  <div class="row">
+    <div>
+      <label>Decoded</label>
+      <pre id="decoded">…</pre>
+    </div>
+    <div>
+      <label>Canonical ERC-7930 binary</label>
+      <pre id="binary">…</pre>
+      <label>Canonical ERC-7828 text (with checksum)</label>
+      <pre id="canonical">…</pre>
+    </div>
+  </div>
+</div>
+
+<h2>Frame Transaction Encoder <span class="pill">EIP-8141 (type 0x06)</span></h2>
+<div class="panel">
+  <label for="tx-input">Frame tx as JSON</label>
+  <textarea id="tx-input">{
+  "chainId": "1",
+  "nonce": "7",
+  "sender": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  "frames": [
+    {"target": "0xabad1deaabad1deaabad1deaabad1deaabad1dea", "gasLimit": "100000", "value": "0",    "data": "0xcafe"},
+    {"target": "0xfeedfacefeedfacefeedfacefeedfacefeedface", "gasLimit": "80000",  "value": "1000", "data": "0xbeef"}
+  ],
+  "maxPriorityFeePerGas": "1000000000",
+  "maxFeePerGas": "20000000000",
+  "maxFeePerBlobGas": "0",
+  "blobVersionedHashes": []
+}</textarea>
+  <button id="run-tx">Encode + simulate</button>
+  <div class="row">
+    <div>
+      <label>Encoded (RLP, type-prefixed 0x06)</label>
+      <pre id="tx-hex">…</pre>
+      <label>Gas</label>
+      <pre id="tx-gas">…</pre>
+    </div>
+    <div>
+      <label>Simulator result</label>
+      <pre id="tx-sim">…</pre>
+    </div>
+  </div>
+</div>
+
+<p class="sub">Pure browser demo — no server. Both libraries also work as Node packages. See the README on GitHub.</p>
+
+<script type="module">
+  import { keccak_256 } from "https://esm.sh/@noble/hashes@1.4.0/sha3";
+  import { RLP } from "https://esm.sh/@ethereumjs/rlp@5.0.2";
+
+  const hex2bytes = h => {
+    const s = h.replace(/^0x/i, "");
+    if (s.length % 2) throw new Error("odd hex");
+    const out = new Uint8Array(s.length / 2);
+    for (let i = 0; i < out.length; i++) out[i] = parseInt(s.slice(i * 2, i * 2 + 2), 16);
+    return out;
+  };
+  const bytes2hex = b => "0x" + Array.from(b, x => x.toString(16).padStart(2, "0")).join("");
+  const u16BE = n => new Uint8Array([(n >>> 8) & 0xff, n & 0xff]);
+  const concat = (...parts) => {
+    const total = parts.reduce((n, p) => n + p.length, 0);
+    const out = new Uint8Array(total);
+    let off = 0; for (const p of parts) { out.set(p, off); off += p.length; }
+    return out;
+  };
+  const bigToBytes = n => {
+    if (n < 0n) throw new Error("neg");
+    if (n === 0n) return new Uint8Array();
+    const o = []; let v = n;
+    while (v > 0n) { o.unshift(Number(v & 0xffn)); v >>= 8n; }
+    return new Uint8Array(o);
+  };
+  const bytesToBig = b => { let v = 0n; for (const x of b) v = (v << 8n) | BigInt(x); return v; };
+
+  const HUMAN = {
+    ethereum: "eip155:1", mainnet: "eip155:1", sepolia: "eip155:11155111",
+    optimism: "eip155:10", base: "eip155:8453", arbitrum: "eip155:42161",
+    polygon: "eip155:137", bsc: "eip155:56",
+  };
+  function evmEncodeChainRef(ref) {
+    const id = BigInt(ref); if (id === 0n) return new Uint8Array([0]);
+    return bigToBytes(id);
+  }
+  function evmEncodeAddr(a) {
+    const b = hex2bytes(a);
+    if (b.length !== 20) throw new Error(`evm addr must be 20 bytes, got ${b.length}`);
+    return b;
+  }
+  function encodeInterop(caip2, address) {
+    let chainRef = new Uint8Array(), chainTypeId = 0;
+    if (caip2) {
+      const i = caip2.indexOf(":");
+      const ns = caip2.slice(0, i), ref = caip2.slice(i + 1);
+      if (ns !== "eip155") throw new Error(`demo supports only eip155, got ${ns}`);
+      chainTypeId = 0; chainRef = evmEncodeChainRef(ref);
+    }
+    const addr = address ? evmEncodeAddr(address) : new Uint8Array();
+    return bytes2hex(concat(
+      u16BE(1), u16BE(chainTypeId),
+      new Uint8Array([chainRef.length]), chainRef,
+      new Uint8Array([addr.length]), addr,
+    ));
+  }
+  function decodeInterop(hex) {
+    const b = hex2bytes(hex);
+    if (b.length < 6) throw new Error("too short");
+    const version = (b[0] << 8) | b[1];
+    const ct = (b[2] << 8) | b[3];
+    const cl = b[4];
+    const cr = b.slice(5, 5 + cl);
+    const al = b[5 + cl];
+    const ad = b.slice(6 + cl, 6 + cl + al);
+    if (6 + cl + al !== b.length) throw new Error("trailing bytes");
+    let caip2 = "", addr = "";
+    if (ct === 0) {
+      if (cl > 0) caip2 = "eip155:" + bytesToBig(cr).toString();
+      if (al > 0) addr = bytes2hex(ad);
+    } else throw new Error(`demo supports only ChainType 0x0000 (EVM), got ${ct}`);
+    return { version, chainType: ct, caip2, address: addr };
+  }
+  function checksum(binHex) {
+    const h = keccak_256(hex2bytes(binHex));
+    return Array.from(h.slice(0, 4), x => x.toString(16).padStart(2, "0")).join("").toUpperCase();
+  }
+  function parseText(s) {
+    const m = s.match(/^([^@]+)@([^#]+)(?:#([0-9a-fA-F]{8}))?$/);
+    if (!m) return null;
+    const [, addr, chainRaw, cs] = m;
+    const chain = chainRaw.trim();
+    const caip2 = chain.includes(":") ? chain : HUMAN[chain.toLowerCase()];
+    if (!caip2) throw new Error(`unknown human label: ${chain}`);
+    return { addressPart: addr, caip2, checksum: cs };
+  }
+
+  function refreshInterop() {
+    const out = (id, txt, cls = "") => {
+      const el = document.getElementById(id);
+      el.textContent = txt;
+      el.className = cls;
+    };
+    const input = document.getElementById("text-input").value.trim();
+    try {
+      let bin, decoded;
+      if (input.startsWith("0x") && !input.includes("@")) {
+        bin = input;
+        decoded = decodeInterop(bin);
+      } else {
+        const parsed = parseText(input);
+        if (!parsed) throw new Error("invalid format — expected <addr>@<chain>[#<checksum>]");
+        if (!parsed.addressPart.startsWith("0x")) throw new Error("ENS not resolved in this demo — try the 0x form");
+        bin = encodeInterop(parsed.caip2, parsed.addressPart);
+        if (parsed.checksum) {
+          const expected = checksum(bin);
+          if (expected.toUpperCase() !== parsed.checksum.toUpperCase())
+            throw new Error(`checksum mismatch: expected ${expected}, got ${parsed.checksum}`);
+        }
+        decoded = decodeInterop(bin);
+      }
+      out("decoded", JSON.stringify({
+        version: decoded.version,
+        chainType: "0x" + decoded.chainType.toString(16).padStart(4, "0"),
+        caip2: decoded.caip2,
+        address: decoded.address,
+      }, null, 2), "ok");
+      out("binary", bin, "ok");
+      out("canonical", `${decoded.address}@${decoded.caip2}#${checksum(bin)}`, "ok");
+    } catch (e) {
+      out("decoded", "Error: " + e.message, "err");
+      out("binary", "—");
+      out("canonical", "—");
+    }
+  }
+  document.getElementById("text-input").addEventListener("input", refreshInterop);
+  refreshInterop();
+
+  const FRAME_TX_TYPE = 0x06;
+  const INTRINSIC = 15000n, PER_FRAME = 475n;
+  function frameToRlp(f) {
+    return [
+      bigToBytes(BigInt(f.mode || 0)),
+      bigToBytes(BigInt(f.flags || 0)),
+      hex2bytes(f.target || "0x"),
+      bigToBytes(BigInt(f.gasLimit || 0)),
+      bigToBytes(BigInt(f.value || 0)),
+      hex2bytes(f.data || "0x"),
+    ];
+  }
+  function calldataCost(b) {
+    let c = 0n; for (const x of b) c += x === 0 ? 4n : 16n; return c;
+  }
+  function intrinsicGas(tx) {
+    const fr = RLP.encode(tx.frames.map(frameToRlp));
+    return INTRINSIC + BigInt(tx.frames.length) * PER_FRAME + calldataCost(fr);
+  }
+  function encodeTx(tx) {
+    const payload = [
+      bigToBytes(BigInt(tx.chainId)),
+      bigToBytes(BigInt(tx.nonce)),
+      hex2bytes(tx.sender),
+      tx.frames.map(frameToRlp),
+      bigToBytes(BigInt(tx.maxPriorityFeePerGas || 0)),
+      bigToBytes(BigInt(tx.maxFeePerGas || 0)),
+      bigToBytes(BigInt(tx.maxFeePerBlobGas || 0)),
+      (tx.blobVersionedHashes || []).map(hex2bytes),
+    ];
+    return bytes2hex(concat(new Uint8Array([FRAME_TX_TYPE]), RLP.encode(payload)));
+  }
+  function simulate(tx) {
+    let cumulative = intrinsicGas(tx);
+    const out = []; let reverted = false;
+    for (let i = 0; i < tx.frames.length; i++) {
+      if (reverted) { out.push({ index: i, status: "skipped", gasUsed: "0" }); continue; }
+      const f = tx.frames[i];
+      const data = hex2bytes(f.data || "0x");
+      const limit = BigInt(f.gasLimit || 0);
+      let gasUsed = 21000n, status = "success";
+      if (data.length > 0 && data[0] === 0xfd) { gasUsed = limit; status = "revert"; reverted = true; }
+      else if (data.length > 0 && data[0] === 0xfe) { gasUsed = limit; status = "revert"; reverted = true; }
+      else gasUsed = (21000n + BigInt(data.length) * 200n) < limit ? 21000n + BigInt(data.length) * 200n : limit;
+      cumulative += gasUsed;
+      out.push({ index: i, status, gasUsed: gasUsed.toString() });
+    }
+    if (reverted) {
+      const firstRevert = out.findIndex(r => r.status === "revert");
+      for (let j = 0; j < firstRevert; j++) if (out[j].status === "success") out[j].status = "revert (rolled back)";
+    }
+    const sumLimit = tx.frames.reduce((s, f) => s + BigInt(f.gasLimit || 0), 0n);
+    const sumUsed = out.reduce((s, r) => s + BigInt(r.gasUsed), 0n);
+    return { reverted, totalGasUsed: cumulative.toString(), refund: (sumLimit - sumUsed).toString(), frames: out };
+  }
+  function refreshTx() {
+    const set = (id, txt, cls = "") => {
+      const el = document.getElementById(id); el.textContent = txt; el.className = cls;
+    };
+    try {
+      const tx = JSON.parse(document.getElementById("tx-input").value);
+      const hex = encodeTx(tx);
+      const intr = intrinsicGas(tx);
+      const total = intr + tx.frames.reduce((s, f) => s + BigInt(f.gasLimit || 0), 0n);
+      set("tx-hex", hex.slice(0, 200) + (hex.length > 200 ? "…" : ""), "ok");
+      set("tx-gas", JSON.stringify({ intrinsic: intr.toString(), total: total.toString() }, null, 2), "ok");
+      set("tx-sim", JSON.stringify(simulate(tx), null, 2), "ok");
+    } catch (e) {
+      set("tx-hex", "Error: " + e.message, "err");
+      set("tx-gas", "—");
+      set("tx-sim", "—");
+    }
+  }
+  document.getElementById("run-tx").addEventListener("click", refreshTx);
+  refreshTx();
+</script>
+</body>
+</html>
