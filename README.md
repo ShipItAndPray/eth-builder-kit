@@ -1,5 +1,7 @@
 # eth-builder-kit
 
+🚀 **[Live demo →](https://shipitandpray.github.io/eth-builder-kit/)**
+
 Two reference implementations of in-flight Ethereum standards, built and hardened via Karpathy-style autoresearch (run evals → identify failures → mutate one thing → keep wins → loop).
 
 ## Packages
